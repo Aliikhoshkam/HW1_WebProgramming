@@ -173,3 +173,63 @@ git commit -m "Stop tracking temporary cache"
 This additional removal is unnecessary for the assignment's temporary files because they are already untracked.
 
 
+## Question 5: Resolving Merge Conflicts in Teamwork
+
+### 5.1 Why the conflict occurs
+
+The branches changed the same line differently relative to their common ancestor. Git cannot automatically determine the intended result.
+
+Two people editing the same file does not always cause a conflict. Non-overlapping changes can usually merge automatically.
+
+### 5.2 Identifying conflicts
+
+While the merge is stopped on `main`:
+
+git status
+git diff --name-only --diff-filter=U
+
+Open `README.md`. With the default conflict style, the conflicting versions appear between markers:
+
+<<<<<<< HEAD
+This project provides a web programming tutorial.
+=======
+This project includes practical Git exercises.
+>>>>>>> feature-description
+
+The upper block belongs to the current branch, `main`. The lower block comes from the incoming branch, `feature-description`.
+
+### 5.3 Preserving both changes and completing the merge
+
+Replace the entire marked block with coherent combined text:
+
+```text
+This project provides a web programming tutorial with practical Git exercises.
+
+
+Remove all conflict markers and review the complete file.
+
+Check for leftover markers and whitespace problems, stage the resolution, and review it:
+
+```bash
+git diff --check
+git add README.md
+git diff --cached --check
+git diff --cached -- README.md
+git status
+
+Fix any reported problems before proceeding. Status must show no unmerged paths.
+
+Then complete the merge:
+
+git commit -m "Merge feature-description and resolve README conflict"
+git status
+
+### 5.4 Canceling the merge
+
+Before completing it:
+
+git merge --abort
+
+Given the initially clean working tree, this restores the pre-merge state.
+
+
