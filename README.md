@@ -109,4 +109,67 @@ For example, if a login test passed in an older release but fails now, bisect he
 
 Bisect identifies the introducing commit; it does not fix the bug.
 
+## Question 4: Reviewing Changes Before Committing
+
+### 4.1 Checking repository status and changes
+
+git status
+git diff -- README.md
+git diff --cached -- README.md
+
+`git status` reports staged, unstaged, and untracked changes.
+
+| Command | Comparison | Meaning |
+| --- | --- | --- |
+| `git diff` | Working tree versus staging area | Changes not yet staged |
+| `git diff --cached` | Staging area versus HEAD | Changes prepared for the next commit |
+
+`--staged` is an alias for `--cached`.
+
+The staging area, also called the index, stores the selected snapshot for the next commit. Editing a file after staging it does not automatically update that snapshot.
+
+Therefore, `README.md` can have both staged and unstaged changes at the same time.
+
+Ordinary diffs do not show the contents of untracked files in `tmp/`.
+
+### 4.2 What an ordinary commit includes
+
+git commit -m "Update README"
+
+An ordinary commit without `-a` or file arguments records the staging area.
+
+Therefore:
+
+- Previously staged README changes are included.
+- Later unstaged README edits remain in the working tree.
+- Other already-staged changes are also included.
+- Untracked files in `tmp/` are not included.
+
+The reason is that an ordinary commit records the index, not every current working-tree edit.
+
+### 4.3 Ignoring the temporary directory
+
+Add the following line to `.gitignore` in the repository root:
+
+/tmp/
+
+This ignores the root-level `tmp` directory and its contents.
+
+To record the ignore rule:
+
+git add .gitignore
+git commit -m "Ignore temporary files"
+
+Any other changes already staged would also be included, so I inspect the staging area first if this should be a separate commit.
+
+Ignore rules do not stop tracking files that are already tracked.
+
+For an already-tracked temporary file, I would add the ignore rule and remove the file from the index while preserving its local copy:
+
+git rm --cached -- tmp/cache.txt
+git add .gitignore
+git commit -m "Stop tracking temporary cache"
+
+This additional removal is unnecessary for the assignment's temporary files because they are already untracked.
+
 
