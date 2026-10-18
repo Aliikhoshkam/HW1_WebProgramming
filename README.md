@@ -233,3 +233,69 @@ git merge --abort
 Given the initially clean working tree, this restores the pre-merge state.
 
 
+
+## Question 6: Undoing Changes
+
+These are independent situations, not consecutive steps.
+
+### 6.1 Discard unstaged changes in notes.txt
+
+git restore -- notes.txt
+
+By default, this restores the working-tree file from the staging area.
+
+In this scenario, the staged version matches the last commit, so the unwanted edits are discarded.
+
+Effects:
+
+- Working tree: `notes.txt` is restored.
+- Staging area: unchanged.
+- Commit history: unchanged.
+- Other files: unchanged.
+
+The discarded unstaged edits are not saved by this command.
+
+### 6.2 Unstage notes.txt while preserving its edits
+
+git restore --staged -- notes.txt
+
+With `--staged`, the default source is `HEAD`.
+
+This restores only the file's staging-area entry to its last committed version. The edits remain in the working-tree file.
+
+Effects:
+
+- Working tree: edits are preserved.
+- Staging area: the file's entry matches `HEAD`.
+- Commit history: unchanged.
+
+The `--` separator indicates that the following argument is a file path.
+
+### 6.3 Reverse an incorrect commit already shared on main
+
+Assume I am on the shared `main` branch with a clean working tree. The example ID `b2c3d4e` identifies the incorrect ordinary commit:
+
+git revert b2c3d4e
+git push origin main
+
+Here, `origin` is the assumed remote name. If Git opens an editor for the revert commit message, save and close it to complete the commit.
+
+Under the stated no-conflict assumption, revert creates a new commit that applies the inverse of the selected commit's changes.
+
+Effects:
+
+- Working tree: updated to the reversal result.
+- Staging area: matches the new commit.
+- Commit history: gains a new reversal commit; existing commits remain unchanged.
+
+This is appropriate because teammates have already received the original commit.
+
+Deleting the commit with a history-rewriting reset and force-push would make their existing histories disagree with the remote and could disrupt subsequent work. Revert instead produces a normal new commit that teammates can receive without rewriting their existing history.
+
+| Situation | Command | Working tree | Staging area | History |
+| --- | --- | --- | --- | --- |
+| Discard unstaged edits | `git restore -- notes.txt` | Restored from index | Unchanged | Unchanged |
+| Unstage but keep edits | `git restore --staged -- notes.txt` | Edits preserved | File restored from HEAD | Unchanged |
+| Reverse a shared commit | `git revert b2c3d4e` | Updated | Matches new commit | New reversal commit |
+
+
